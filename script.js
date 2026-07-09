@@ -1,5 +1,9 @@
+// ==========================================
+// STEP 1 & 2: Data Structure & Initial Setup
+// ==========================================
 const myLibrary = [];
 
+// Book constructor with unique ID using crypto.randomUUID()
 function Book(title, author, pages, read) {
   this.id = crypto.randomUUID(); 
   this.title = title;
@@ -8,77 +12,101 @@ function Book(title, author, pages, read) {
   this.read = read; 
 }
 
+// Function to create a book and push it to the array
 function addBookToLibrary(title, author, pages, read) {
   const newBook = new Book(title, author, pages, read);
   myLibrary.push(newBook);
 }
 
-// Add 2 new books
+// Add sample books for testing
 addBookToLibrary("The Hobbit", "J.R.R. Tolkien", 310, true);
 addBookToLibrary("1984", "George Orwell", 328, false);
 
 
+// ==========================================
+// STEP 3: Display Books (Modified for Step 4)
+// ==========================================
 function displayBooks() {
   const container = document.getElementById("library-container");
-  
-  // Clean container to don´t do it again
   container.innerHTML = ""; 
 
-  // Show each book of the array
   myLibrary.forEach((book) => {
-
     const card = document.createElement("div");
     card.classList.add("book-card"); 
 
+    // 🚨 NEW: Link the HTML element with the JS object using data-attribute
+    card.dataset.id = book.id; 
+
+    // 🚨 NEW: Added a delete button inside the card template
     card.innerHTML = `
       <h3>${book.title}</h3>
       <p><strong>Author:</strong> ${book.author}</p>
       <p><strong>Pages:</strong> ${book.pages}</p>
-      <p><strong>State:</strong> ${book.read ? "Read" : "Unread"}</p>
+      <p><strong>Status:</strong> ${book.read ? "Read" : "Not read yet"}</p>
+      <button class="delete-btn">🗑️ Delete</button>
     `;
+
+    // 🚨 NEW: Target the delete button of this specific card and add the event
+    const deleteBtn = card.querySelector(".delete-btn");
+    deleteBtn.addEventListener("click", () => {
+      removeBook(book.id); // Call the removal logic passing the unique ID
+    });
 
     container.appendChild(card);
   });
 }
 
-displayBooks();
 
-// Seleccionamos los elementos del DOM que necesitamos
+// ==========================================
+// STEP 4: New Logic - Remove Book Function
+// ==========================================
+function removeBook(idToDelete) {
+  // Find the index of the book inside the array that matches the ID
+  const index = myLibrary.findIndex(book => book.id === idToDelete);
+  
+  // If the book is found, remove it from the array using splice
+  if (index !== -1) {
+    myLibrary.splice(index, 1);
+  }
+  
+  // Refresh the screen to show the updated library without the deleted book
+  displayBooks(); 
+}
+
+
+// ==========================================
+// STEP 5: Form Control & Event Listeners
+// ==========================================
 const dialog = document.getElementById("book-dialog");
 const newBookBtn = document.getElementById("new-book-btn");
 const closeDialogBtn = document.getElementById("close-dialog");
 const bookForm = document.getElementById("book-form");
 
-// 1. Cuando el usuario hace clic en "Nuevo Libro", mostramos el modal
+// Open modal
 newBookBtn.addEventListener("click", () => {
-  dialog.showModal(); // Método nativo de la etiqueta <dialog>
+  dialog.showModal();
 });
 
-// 2. Cuando el usuario hace clic en "Cancelar", cerramos el modal
+// Close modal
 closeDialogBtn.addEventListener("click", () => {
-  dialog.close(); // Método nativo para cerrar
+  dialog.close();
 });
 
-// 3. Capturamos el momento en que el usuario envía (submit) el formulario
+// Form submission handler
 bookForm.addEventListener("submit", (event) => {
-  // 🚨 ¡REQUISITO CLAVE! Evitamos que la página se recargue automáticamente
   event.preventDefault();
 
-  // Recogemos los valores que el usuario escribió en los inputs
   const titleValue = document.getElementById("title").value;
   const authorValue = document.getElementById("author").value;
   const pagesValue = document.getElementById("pages").value;
-  const readValue = document.getElementById("read").checked; // Da true si está marcado, false si no
+  const readValue = document.getElementById("read").checked;
 
-  // Enviamos estos datos a nuestra función del Paso 1 para crear el objeto y meterlo al array
   addBookToLibrary(titleValue, authorValue, pagesValue, readValue);
-
-  // Volvemos a ejecutar la función del Paso 2 para redibujar la pantalla con el nuevo libro
   displayBooks();
 
-  // Limpiamos los campos del formulario para que queden vacíos la próxima vez
   bookForm.reset();
-
-  // Cerramos la ventana emergente automáticamente
   dialog.close();
 });
+
+// Initial render of the sample books
+displayBooks();
