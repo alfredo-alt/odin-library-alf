@@ -1,9 +1,9 @@
 // ==========================================
-// STEP 1 & 2: Data Structure & Initial Setup
+// STEP 1: Data Structure & Prototype
 // ==========================================
 const myLibrary = [];
 
-// Book constructor with unique ID using crypto.randomUUID()
+// Book constructor with unique ID
 function Book(title, author, pages, read) {
   this.id = crypto.randomUUID(); 
   this.title = title;
@@ -11,6 +11,11 @@ function Book(title, author, pages, read) {
   this.pages = pages;
   this.read = read; 
 }
+
+// 🚨 NEW: Add toggleRead function to the Book prototype
+Book.prototype.toggleRead = function() {
+  this.read = !this.read; // Inverts the boolean value )
+};
 
 // Function to create a book and push it to the array
 function addBookToLibrary(title, author, pages, read) {
@@ -24,7 +29,7 @@ addBookToLibrary("1984", "George Orwell", 328, false);
 
 
 // ==========================================
-// STEP 3: Display Books (Modified for Step 4)
+// STEP 2 & 3: Display Books (With Toggle Button)
 // ==========================================
 function displayBooks() {
   const container = document.getElementById("library-container");
@@ -33,23 +38,30 @@ function displayBooks() {
   myLibrary.forEach((book) => {
     const card = document.createElement("div");
     card.classList.add("book-card"); 
-
-    // 🚨 NEW: Link the HTML element with the JS object using data-attribute
     card.dataset.id = book.id; 
 
-    // 🚨 NEW: Added a delete button inside the card template
+    // 🚨 MODIFIED: Status styling classes and Toggle Button added
     card.innerHTML = `
       <h3>${book.title}</h3>
       <p><strong>Author:</strong> ${book.author}</p>
       <p><strong>Pages:</strong> ${book.pages}</p>
-      <p><strong>Status:</strong> ${book.read ? "Read" : "Not read yet"}</p>
-      <button class="delete-btn">🗑️ Delete</button>
+      <p><strong>Status:</strong> <span class="status-text">${book.read ? "Read" : "Not read yet"}</span></p>
+      <div class="card-buttons">
+        <button class="toggle-read-btn">${book.read ? "Mark as Unread" : "Mark as Read"}</button>
+        <button class="delete-btn">🗑️ Delete</button>
+      </div>
     `;
 
-    // 🚨 NEW: Target the delete button of this specific card and add the event
+    // Target the delete button
     const deleteBtn = card.querySelector(".delete-btn");
     deleteBtn.addEventListener("click", () => {
-      removeBook(book.id); // Call the removal logic passing the unique ID
+      removeBook(book.id); 
+    });
+
+    // 🚨 NEW: Target the toggle read button
+    const toggleReadBtn = card.querySelector(".toggle-read-btn");
+    toggleReadBtn.addEventListener("click", () => {
+      toggleBookStatus(book.id);
     });
 
     container.appendChild(card);
@@ -58,41 +70,47 @@ function displayBooks() {
 
 
 // ==========================================
-// STEP 4: New Logic - Remove Book Function
+// STEP 4 & 5: Core Logic Functions
 // ==========================================
+
+// Remove book logic
 function removeBook(idToDelete) {
-  // Find the index of the book inside the array that matches the ID
   const index = myLibrary.findIndex(book => book.id === idToDelete);
-  
-  // If the book is found, remove it from the array using splice
   if (index !== -1) {
     myLibrary.splice(index, 1);
   }
-  
-  // Refresh the screen to show the updated library without the deleted book
   displayBooks(); 
+}
+
+// 🚨 NEW: Toggle book read status logic
+function toggleBookStatus(idToToggle) {
+  // Find the actual object inside the library array
+  const book = myLibrary.find(book => book.id === idToToggle);
+  
+  if (book) {
+    book.toggleRead(); // Execute the prototype method on the object instance
+  }
+  
+  displayBooks(); // Refresh the DOM view to show the new state
 }
 
 
 // ==========================================
-// STEP 5: Form Control & Event Listeners
+// FORM CONTROL & EVENT LISTENERS
 // ==========================================
 const dialog = document.getElementById("book-dialog");
 const newBookBtn = document.getElementById("new-book-btn");
 const closeDialogBtn = document.getElementById("close-dialog");
 const bookForm = document.getElementById("book-form");
 
-// Open modal
 newBookBtn.addEventListener("click", () => {
   dialog.showModal();
 });
 
-// Close modal
 closeDialogBtn.addEventListener("click", () => {
   dialog.close();
 });
 
-// Form submission handler
 bookForm.addEventListener("submit", (event) => {
   event.preventDefault();
 
@@ -108,5 +126,5 @@ bookForm.addEventListener("submit", (event) => {
   dialog.close();
 });
 
-// Initial render of the sample books
+// Initial application render
 displayBooks();
