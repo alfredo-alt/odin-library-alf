@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Biblioteca - Odin Project</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+    <h1>My Virtual Library</h1>
+    
+    <button id="new-book-btn">➕ New book</button>
+
+    <dialog id="book-dialog">
+        <h2>Add a new book</h2>
+        
+        <form id="book-form">
+            <div>
+            <label for="title">Tittle:</label>
+            <input type="text" id="title" required placeholder="Ej. The Alquemist">
+            </div>
+            
+            <div>
+            <label for="author">Author:</label>
+            <input type="text" id="author" required placeholder="Ej. Paulo Coelho">
+            </div>
+            
+            <div>
+            <label for="pages">Number of pages:</label>
+            <input type="number" id="pages" required min="1" placeholder="Ej. 192">
+            </div>
+            
+            <div>
+            <label>
+                <input type="checkbox" id="read"> ¿Have you ever read it?
+            </label>
+            </div>
+            
+            <div class="form-buttons">
+            <button type="submit">Save</button>
+            <button type="button" id="close-dialog">Cancel</button>
+            </div>
+        </form>
+    </dialog>
+
+    <div id="library-container"></div>
+
+    <script src="script.js"></script>
+</body>
+</html>
