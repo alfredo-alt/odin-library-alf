@@ -1,46 +1,71 @@
 // ==========================================
-// STEP 1: Data Structure & Prototype
+// STEP 1: Book Blueprint (ES6 Class)
 // ==========================================
-const myLibrary = [];
+class Book {
+  constructor(title, author, pages, read) {
+    this.id = crypto.randomUUID();
+    this.title = title;
+    this.author = author;
+    this.pages = pages;
+    this.read = read;
+  }
 
-// Book constructor with unique ID
-function Book(title, author, pages, read) {
-  this.id = crypto.randomUUID(); 
-  this.title = title;
-  this.author = author;
-  this.pages = pages;
-  this.read = read; 
+  // Prototype methods are now neatly tucked inside the class body
+  toggleRead() {
+    this.read = !this.read;
+  }
 }
 
-// 🚨 NEW: Add toggleRead function to the Book prototype
-Book.prototype.toggleRead = function() {
-  this.read = !this.read; // Inverts the boolean value )
-};
+// ==========================================
+// STEP 2: Library Manager (Encapsulating State & Logic)
+// ==========================================
+class LibraryManager {
+  constructor() {
+    this.myLibrary = [];
+  }
 
-// Function to create a book and push it to the array
-function addBookToLibrary(title, author, pages, read) {
-  const newBook = new Book(title, author, pages, read);
-  myLibrary.push(newBook);
+  addBook(title, author, pages, read) {
+    const newBook = new Book(title, author, pages, read);
+    this.myLibrary.push(newBook);
+  }
+
+  removeBook(idToDelete) {
+    this.myLibrary = this.myLibrary.filter(book => book.id !== idToDelete);
+  }
+
+  toggleBookStatus(idToToggle) {
+    const book = this.myLibrary.find(book => book.id === idToToggle);
+    if (book) {
+      book.toggleRead();
+    }
+  }
+  
+  get books() {
+    return [...this.myLibrary]; // Using spread operator to prevent direct mutation from outside
+  }
 }
+
+// Instantiate our single library orchestrator
+const library = new LibraryManager();
 
 // Add sample books for testing
-addBookToLibrary("The Hobbit", "J.R.R. Tolkien", 310, true);
-addBookToLibrary("1984", "George Orwell", 328, false);
+library.addBook("The Hobbit", "J.R.R. Tolkien", 310, true);
+library.addBook("1984", "George Orwell", 328, false);
 
 
 // ==========================================
-// STEP 2 & 3: Display Books (With Toggle Button)
+// STEP 3: DOM Display Controller
 // ==========================================
 function displayBooks() {
   const container = document.getElementById("library-container");
   container.innerHTML = ""; 
 
-  myLibrary.forEach((book) => {
+  // Fetch books directly from our manager object
+  library.books.forEach((book) => {
     const card = document.createElement("div");
     card.classList.add("book-card"); 
     card.dataset.id = book.id; 
 
-    // 🚨 MODIFIED: Status styling classes and Toggle Button added
     card.innerHTML = `
       <h3>${book.title}</h3>
       <p><strong>Author:</strong> ${book.author}</p>
@@ -52,46 +77,19 @@ function displayBooks() {
       </div>
     `;
 
-    // Target the delete button
-    const deleteBtn = card.querySelector(".delete-btn");
-    deleteBtn.addEventListener("click", () => {
-      removeBook(book.id); 
+    // Setup action listeners inside the card
+    card.querySelector(".delete-btn").addEventListener("click", () => {
+      library.removeBook(book.id);
+      displayBooks(); // Refresh UI
     });
 
-    // 🚨 NEW: Target the toggle read button
-    const toggleReadBtn = card.querySelector(".toggle-read-btn");
-    toggleReadBtn.addEventListener("click", () => {
-      toggleBookStatus(book.id);
+    card.querySelector(".toggle-read-btn").addEventListener("click", () => {
+      library.toggleBookStatus(book.id);
+      displayBooks(); // Refresh UI
     });
 
     container.appendChild(card);
   });
-}
-
-
-// ==========================================
-// STEP 4 & 5: Core Logic Functions
-// ==========================================
-
-// Remove book logic
-function removeBook(idToDelete) {
-  const index = myLibrary.findIndex(book => book.id === idToDelete);
-  if (index !== -1) {
-    myLibrary.splice(index, 1);
-  }
-  displayBooks(); 
-}
-
-// 🚨 NEW: Toggle book read status logic
-function toggleBookStatus(idToToggle) {
-  // Find the actual object inside the library array
-  const book = myLibrary.find(book => book.id === idToToggle);
-  
-  if (book) {
-    book.toggleRead(); // Execute the prototype method on the object instance
-  }
-  
-  displayBooks(); // Refresh the DOM view to show the new state
 }
 
 
@@ -119,7 +117,7 @@ bookForm.addEventListener("submit", (event) => {
   const pagesValue = document.getElementById("pages").value;
   const readValue = document.getElementById("read").checked;
 
-  addBookToLibrary(titleValue, authorValue, pagesValue, readValue);
+  library.addBook(titleValue, authorValue, pagesValue, readValue);
   displayBooks();
 
   bookForm.reset();
