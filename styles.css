@@ -1,0 +1,12 @@
+.error-message {
+  display: block;
+  color: #c0392b;
+  font-size: 0.85rem;
+  margin-top: 0.2rem;
+  min-height: 1.1em; /* reserves space so the layout doesn't jump when an error appears */
+}
+
+.input-error {
+  border: 1px solid #c0392b;
+  outline: none;
+}

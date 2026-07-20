@@ -15,20 +15,23 @@
     <dialog id="book-dialog">
         <h2>Add a new book</h2>
         
-        <form id="book-form">
+        <form id="book-form" novalidate>
             <div>
             <label for="title">Tittle:</label>
             <input type="text" id="title" required placeholder="Ej. The Alquemist">
+            <span class="error-message" id="title-error"></span>
             </div>
             
             <div>
             <label for="author">Author:</label>
             <input type="text" id="author" required placeholder="Ej. Paulo Coelho">
+            <span class="error-message" id="author-error"></span>
             </div>
             
             <div>
             <label for="pages">Number of pages:</label>
             <input type="number" id="pages" required min="1" placeholder="Ej. 192">
+            <span class="error-message" id="pages-error"></span>
             </div>
             
             <div>

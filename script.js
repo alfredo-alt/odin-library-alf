@@ -94,6 +94,47 @@ function displayBooks() {
 
 
 // ==========================================
+// FORM VALIDATION
+// ==========================================
+// Single Responsibility: this function ONLY checks whether a field has
+// content and displays/clears its custom error message. It doesn't know
+// anything about books or the library -- it just validates one input.
+function validateRequiredField(input, errorElement, message) {
+  if (!input.value.trim()) {
+    errorElement.textContent = message;
+    input.classList.add('input-error');
+    return false;
+  }
+
+  errorElement.textContent = '';
+  input.classList.remove('input-error');
+  return true;
+}
+
+function validateBookForm(titleInput, authorInput, pagesInput) {
+  // Note: we deliberately don't short-circuit with && here -- we want ALL
+  // three fields checked (and their error messages shown) in one pass,
+  // not just the first one that fails.
+  const isTitleValid = validateRequiredField(
+    titleInput,
+    document.getElementById('title-error'),
+    'The title must be filled!'
+  );
+  const isAuthorValid = validateRequiredField(
+    authorInput,
+    document.getElementById('author-error'),
+    'The author name must be filled!'
+  );
+  const isPagesValid = validateRequiredField(
+    pagesInput,
+    document.getElementById('pages-error'),
+    'The number of pages must be filled!'
+  );
+
+  return isTitleValid && isAuthorValid && isPagesValid;
+}
+
+// ==========================================
 // FORM CONTROL & EVENT LISTENERS
 // ==========================================
 const dialog = document.getElementById("book-dialog");
@@ -101,23 +142,35 @@ const newBookBtn = document.getElementById("new-book-btn");
 const closeDialogBtn = document.getElementById("close-dialog");
 const bookForm = document.getElementById("book-form");
 
+function clearValidationErrors() {
+  document.querySelectorAll('.error-message').forEach((el) => (el.textContent = ''));
+  document.querySelectorAll('.input-error').forEach((el) => el.classList.remove('input-error'));
+}
+
 newBookBtn.addEventListener("click", () => {
   dialog.showModal();
 });
 
 closeDialogBtn.addEventListener("click", () => {
+  bookForm.reset();
+  clearValidationErrors();
   dialog.close();
 });
 
 bookForm.addEventListener("submit", (event) => {
   event.preventDefault();
 
-  const titleValue = document.getElementById("title").value;
-  const authorValue = document.getElementById("author").value;
-  const pagesValue = document.getElementById("pages").value;
+  const titleInput = document.getElementById("title");
+  const authorInput = document.getElementById("author");
+  const pagesInput = document.getElementById("pages");
   const readValue = document.getElementById("read").checked;
 
-  library.addBook(titleValue, authorValue, pagesValue, readValue);
+  const isFormValid = validateBookForm(titleInput, authorInput, pagesInput);
+  if (!isFormValid) {
+    return; // stop here -- error messages are already showing
+  }
+
+  library.addBook(titleInput.value, authorInput.value, pagesInput.value, readValue);
   displayBooks();
 
   bookForm.reset();
